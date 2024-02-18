@@ -176,7 +176,6 @@ App.prototype.doOpenBook = function () {
     fi.style.display = "none";
     fi.type = "file";
     fi.onchange = event => {
-
         var url = "1.epub";
         fetch(url).then(response => {
             return response.blob();
@@ -184,7 +183,7 @@ App.prototype.doOpenBook = function () {
             var file = new File([blob], "book.epub", {type: "application/epub+zip"});
             var reader = new FileReader();
             reader.addEventListener("load", () => {
-                var arr = (new Uint8Array(reader.result)).subarray(0, 2);
+                var arr = (new Uint8Array(file)).subarray(0, 2);
                 var header = "";
                 for (var i = 0; i < arr.length; i++) {
                     header += arr[i].toString(16);
