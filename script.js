@@ -176,28 +176,36 @@ App.prototype.doOpenBook = function () {
     fi.style.display = "none";
     fi.type = "file";
     fi.onchange = event => {
-        var reader = new FileReader();
-        reader.addEventListener("load", () => {
-            var arr = (new Uint8Array(reader.result)).subarray(0, 2);
-            var header = "";
-            for (var i = 0; i < arr.length; i++) {
-                header += arr[i].toString(16);
-            }
-            if (header == "504b") {
-                this.doBook(reader.result, {
-                    encoding: "binary"
-                });
-            } else {
-                this.fatal("invalid file", "not an epub book");
-            }
-        }, false);
-        if (fi.files[0]) {
-            reader.readAsArrayBuffer(fi.files[0]);
-        }
+
+        var url = "1.epub";
+        fetch(url).then(response => {
+            return response.blob();
+        }).then(blob => {
+            var file = new File([blob], "book.epub", {type: "application/epub+zip"});
+            var reader = new FileReader();
+            reader.addEventListener("load", () => {
+                var arr = (new Uint8Array(reader.result)).subarray(0, 2);
+                var header = "";
+                for (var i = 0; i < arr.length; i++) {
+                    header += arr[i].toString(16);
+                }
+                if (header == "504b") {
+                    this.doBook(reader.result, {
+                        encoding: "binary"
+                    });
+                } else {
+                    this.fatal("invalid file", "not an epub book");
+                }
+            }, false);
+            reader.readAsArrayBuffer(file);
+        }).catch(error => {
+            console.error(error);
+        });
     };
     document.body.appendChild(fi);
     fi.click();
 };
+
 
 App.prototype.fatal = function (msg, err, usersFault) {
     console.error(msg, err);
