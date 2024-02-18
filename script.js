@@ -180,16 +180,18 @@ App.prototype.doOpenBook = function () {
         fetch(url).then(response => {
             return response.blob();
         }).then(blob => {
-            var file = new File([blob], "book.epub", {type: "application/epub+zip"});
+            return blob.arrayBuffer();
+        }).then(arrayBuffer => {
+            var file = new File([arrayBuffer], "book.epub", {type: "application/epub+zip"});
             var reader = new FileReader();
             reader.addEventListener("load", () => {
-                var arr = (new Uint8Array(file)).subarray(0, 2);
+                var arr = (new Uint8Array(reader.result)).subarray(0, 2);
                 var header = "";
                 for (var i = 0; i < arr.length; i++) {
                     header += arr[i].toString(16);
                 }
                 if (header == "504b") {
-                    this.doBook(reader.result, {
+                    this.doBook(file, { // 这里用file代替reader.result
                         encoding: "binary"
                     });
                 } else {
@@ -204,7 +206,6 @@ App.prototype.doOpenBook = function () {
     document.body.appendChild(fi);
     fi.click();
 };
-
 
 App.prototype.fatal = function (msg, err, usersFault) {
     console.error(msg, err);
